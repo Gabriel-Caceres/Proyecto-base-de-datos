@@ -1,4 +1,4 @@
-```sql
+
 CREATE OR REPLACE PACKAGE pkg_reportes_ventas IS
 
     PROCEDURE resumen_ventas_trabajador (
@@ -116,4 +116,4 @@ CREATE OR REPLACE PACKAGE BODY pkg_reportes_ventas IS
 
 END pkg_reportes_ventas;
 /
-```
+
