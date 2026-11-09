@@ -1,85 +1,54 @@
-
 SET SERVEROUTPUT ON;
 
+/*
+   Demostracion en un bloque PL/SQL anonimo:
+   - NO_DATA_FOUND: excepcion predefinida de Oracle.
+   - e_total_invalido: excepcion definida por el desarrollador.
+
+   El total negativo se simula en una variable para probar la validacion
+   antes de insertar una venta. No se modifica ninguna tabla.
+*/
 DECLARE
     v_nombre_trabajador TRABAJADORES.NOMBRE%TYPE;
-    v_total_venta NUMBER;
+    v_id_busqueda       TRABAJADORES.ID_TRABAJADOR%TYPE := -1;
+    v_total_prueba      VENTAS.TOTAL%TYPE := -1;
 
-    -- Excepcion definida por el desarrollador
     e_total_invalido EXCEPTION;
-
 BEGIN
-
-    --------------------------------------------------
-    -- CASO 1: EXCEPCION PREDEFINIDA DE ORACLE
-    -- NO_DATA_FOUND
-    --------------------------------------------------
-
+    -- Caso 1: Oracle genera NO_DATA_FOUND porque el trabajador no existe.
     BEGIN
-
         SELECT NOMBRE
         INTO v_nombre_trabajador
         FROM TRABAJADORES
-        WHERE ID_TRABAJADOR = -1;
+        WHERE ID_TRABAJADOR = v_id_busqueda;
 
-        DBMS_OUTPUT.PUT_LINE(
-            'Trabajador encontrado: ' || v_nombre_trabajador
-        );
-
+        DBMS_OUTPUT.PUT_LINE('Trabajador encontrado: ' || v_nombre_trabajador);
     EXCEPTION
-
         WHEN NO_DATA_FOUND THEN
-
+            DBMS_OUTPUT.PUT_LINE('EXCEPCION ORACLE: NO_DATA_FOUND');
             DBMS_OUTPUT.PUT_LINE(
-                'EXCEPCION ORACLE: NO_DATA_FOUND'
+                'No existe un trabajador con ID ' || v_id_busqueda || '.'
             );
-
-            DBMS_OUTPUT.PUT_LINE(
-                'No existe un trabajador con ID -1.'
-            );
-
     END;
 
-
-    --------------------------------------------------
-    -- CASO 2: EXCEPCION DEFINIDA POR EL USUARIO
-    --------------------------------------------------
-
-    -- Simulamos un valor invalido para probar el control.
-    -- No insertamos ni modificamos datos de la base.
-
-    v_total_venta := 0;
-
+    -- Caso 2: se valida un total de prueba antes de registrar la venta.
     BEGIN
-
-        IF v_total_venta <= 0 THEN
-
+        IF v_total_prueba < 0 THEN
             RAISE e_total_invalido;
-
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE(
-            'El total de la venta es valido.'
-        );
-
+        DBMS_OUTPUT.PUT_LINE('El total de prueba es valido.');
     EXCEPTION
-
         WHEN e_total_invalido THEN
-
             DBMS_OUTPUT.PUT_LINE(
-                'EXCEPCION USUARIO: El total de la venta no es valido.'
+                'EXCEPCION USUARIO: el total de la venta no puede ser negativo.'
             );
-
     END;
 
-
-    --------------------------------------------------
-    -- FIN DE LAS PRUEBAS
-    --------------------------------------------------
-
-    DBMS_OUTPUT.PUT_LINE(
-        'Pruebas de excepciones finalizadas.'
-    );
-
+    DBMS_OUTPUT.PUT_LINE('Demostracion de excepciones finalizada.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error inesperado: ' || SQLERRM);
+        RAISE;
 END;
 /
